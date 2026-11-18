@@ -1,52 +1,23 @@
-name: Build Pari Kids APK
+name: pari_kids
+description: Pari Kids ICSE LKG Learning App (English & Maths)
+publish_to: 'none'
+version: 1.0.0+1
 
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
+environment:
+  sdk: '>=3.0.0 <4.0.0'
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+dependencies:
+  flutter:
+    sdk: flutter
+  google_fonts: ^6.2.1
+  lottie: ^3.1.2
+  flutter_tts: ^4.0.2
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-
-      - name: Generate Android files & Configure SDK
-        run: |
-          flutter create --platforms=android --project-name pari_kids .
-          python3 -c '
-          p = "android/app/src/main/AndroidManifest.xml"
-          s = open(p).read().replace("android:label=\"pari_kids\"", "android:label=\"Pari Kids\"").replace("<application", "<uses-permission android:name=\"android.permission.INTERNET\"/>\n    <application", 1)
-          open(p, "w").write(s)
-          '
-          if [ -f android/app/build.gradle.kts ]; then
-            sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 23/g' android/app/build.gradle.kts
-          elif [ -f android/app/build.gradle ]; then
-            sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 23/g' android/app/build.gradle
-          fi
-
-      - name: Get dependencies
-        run: flutter pub get
-
-      - name: Build APK
-        run: flutter build apk --release --no-tree-shake-icons
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: Pari-Kids-LKG-App
-          path: build/app/outputs/flutter-apk/app-release.apk
-          
+flutter:
+  uses-material-design: true
+  
