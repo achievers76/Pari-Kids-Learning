@@ -1,23 +1,39 @@
-name: pari_kids
-description: Pari Kids ICSE LKG Learning App (English & Maths)
-publish_to: 'none'
-version: 1.0.0+1
+name: Build Pari Kids APK
 
-environment:
-  sdk: '>=3.0.0 <4.0.0'
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
 
-dependencies:
-  flutter:
-    sdk: flutter
-  google_fonts: ^6.2.1
-  lottie: ^3.1.2
-  flutter_tts: ^4.0.2
+jobs:
+  build:
+    runs-on: ubuntu-latest
 
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  flutter_lints: ^3.0.0
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-flutter:
-  uses-material-design: true
-  
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Create Android Project & Build APK
+        run: |
+          flutter create --platforms=android --project-name pari_kids .
+          sed -i 's/android:label="pari_kids"/android:label="Pari Kids"/g' android/app/src/main/AndroidManifest.xml
+          flutter pub get
+          flutter build apk --release --no-tree-shake-icons
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Pari-Kids-LKG-App
+          path: build/app/outputs/flutter-apk/app-release.apk
+          
